@@ -11,42 +11,33 @@ def get_password_blacklist():
 
 
 def get_password_strength(password):
+    evaluation_dictionary = {
+        'lowercase': '[a-z]',
+        'uppercase': '[A-Z]',
+        'digits': '[0-9]',
+        'non_alphanumeric': '\W+',
+        'special_chars': '[@#$%]'
+    }
     evaluation_point = 0
 
     # evaluating for length
     if len(password) in range(8, 16):
-        evaluation_point += 1
-    elif len(password) > 16:
         evaluation_point += 2
+    elif len(password) > 16:
+        evaluation_point += 3
 
-    # evaluating for lowercase
-    if re.search('[a-z]', password):
-        evaluation_point += 1
-
-    # evaluating for uppercase
-    if re.search('[A-Z]', password):
-        evaluation_point += 1
-
-    # evaluating for digits
-    if re.search('[0-9]', password):
-        evaluation_point += 1
-
-    # evaluating for non-alphanumeric symbols
-    if re.search('\W+', password):
-        evaluation_point += 1
-
-    # evaluating for special characters @, #, $, %
-    if re.search('[@#$%]', password):
-        evaluation_point += 1
+    # evaluate for password has symbols
+    for key in evaluation_dictionary:
+        if re.search(evaluation_dictionary[key], password):
+            evaluation_point += 1
 
     # evaluating the password isn't in and hasn't words from the blacklist
     password_blacklist = get_password_blacklist()
-    password_has_blacklist_word = False
+    password_has_blacklist_word = None
 
     for word in password_blacklist:
         if word in password.lower():
-            password_has_blacklist_word = True
-
+            password_has_blacklist_word.append(word)
     if password not in password_blacklist and not password_has_blacklist_word:
         evaluation_point += 2
 
