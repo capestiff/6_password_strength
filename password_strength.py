@@ -1,4 +1,8 @@
 import re
+from getpass import getpass
+
+# from https://github.com/danielmiessler/SecLists/blob/master/Passwords/500-worst-passwords.txt
+PASSWORD_BLACKLIST_PATH = '500-worst-passwords.txt'
 
 
 def get_eval_score_for_chars(password):
@@ -7,8 +11,7 @@ def get_eval_score_for_chars(password):
         'lowercase': '[a-z]',
         'uppercase': '[A-Z]',
         'digits': '[0-9]',
-        'non_alphanumeric': '\W+',
-        'special_chars': '[@#$%]'
+        'special_chars': '[ !"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~]'
     }
     for key in eval_dict:
         if re.search(eval_dict[key], password):
@@ -20,9 +23,9 @@ def get_eval_score_for_chars(password):
 def get_eval_score_for_length(password):
     eval_score = 0
     if len(password) in range(8, 16):
-        eval_score += 2
-    elif len(password) > 16:
         eval_score += 3
+    elif len(password) > 16:
+        eval_score += 4
 
     return eval_score
 
@@ -36,16 +39,14 @@ def get_eval_score_for_blacklist(password):
         if word in password.lower():
             password_has_blacklist_word.append(word)
 
-    if password not in password_blacklist and not password_has_blacklist_word:
-        eval_score += 2
+    if password not in password_blacklist and not password_has_blacklist_word and len(password) >= 4:
+        eval_score += 1
 
     return eval_score
 
 
 def get_password_blacklist():
-    # I've got this password_blacklist from:
-    # https://github.com/danielmiessler/SecLists/blob/master/Passwords/500-worst-passwords.txt
-    with open('500-worst-passwords.txt', 'r') as file:
+    with open(PASSWORD_BLACKLIST_PATH, 'r') as file:
         password_blacklist = [line.strip() for line in file]
 
     return password_blacklist
@@ -53,13 +54,14 @@ def get_password_blacklist():
 
 def get_password_strength(password):
     common_eval_score = get_eval_score_for_chars(password) \
-                        + get_eval_score_for_length(password)\
+                        + get_eval_score_for_length(password) \
                         + get_eval_score_for_blacklist(password)
+
     return common_eval_score
 
 
 if __name__ == '__main__':
     user_password = ''
-    while len(user_password) < 6:
-        user_password = input('Enter your password (6 characters or more): ')
+    while not user_password:
+        user_password = getpass('Enter your password: ')
     print('Your password has score: {} of 10'.format(get_password_strength(user_password)))
