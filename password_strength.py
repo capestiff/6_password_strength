@@ -3,6 +3,7 @@ from getpass import getpass
 
 # from https://github.com/danielmiessler/SecLists/blob/master/Passwords/500-worst-passwords.txt
 PASSWORD_BLACKLIST_PATH = '500-worst-passwords.txt'
+MAX_EVAL_SCORE = 10
 
 
 def get_eval_score_for_chars(password):
@@ -64,4 +65,4 @@ if __name__ == '__main__':
     user_password = ''
     while not user_password:
         user_password = getpass('Enter your password: ')
-    print('Your password has score: {} of 10'.format(get_password_strength(user_password)))
+    print('Your password has score: {} of {}'.format(get_password_strength(user_password), MAX_EVAL_SCORE))
